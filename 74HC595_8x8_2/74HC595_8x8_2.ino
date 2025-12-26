@@ -18,7 +18,7 @@
       out b4=C4, out b5=C2, out b6=C3, out b7=C1
 */
 
-const int DATA_PIN = 12;   // 74HC595 DS   (pin 14)
+const int DATA_PIN  = 12;  // 74HC595 DS   (pin 14)
 const int CLOCK_PIN = 13;  // 74HC595 SHCP (pin 11)
 const int LATCH_PIN = 11;  // 74HC595 STCP (pin 12)
 
@@ -36,7 +36,8 @@ void shiftWrite(byte value) {
 */
 byte makeByte(
   byte R1, byte R2, byte R3, byte R4,
-  byte C1, byte C2, byte C3, byte C4) {
+  byte C1, byte C2, byte C3, byte C4
+) {
   byte v = 0;
 
   // Rows -> output bitleri
@@ -79,22 +80,22 @@ byte makeByteFromMask(byte mask) {
   - Her adımda 1 satır + 1 kolon seçilir.
   - Kolonlar active-LOW olduğu için seçilen kolon biti 0 yapılır.
 */
-void scanAllRowSegments(uint16_t holdMs) {
+void scanAllSegments(uint16_t holdMs) {
   // Rows: R1..R4 (active-HIGH)
   const byte ROW_MASKS[4] = {
-    0b10000000,  // R1
-    0b01000000,  // R2
-    0b00100000,  // R3
-    0b00010000   // R4
+    0b10000000, // R1
+    0b01000000, // R2
+    0b00100000, // R3
+    0b00010000  // R4
   };
 
   // Cols: C1..C4 (active-LOW: seçilen kolon 0)
   // Alt nibble = C1 C2 C3 C4 (b3..b0)
   const byte COL_MASKS[4] = {
-    0b00000111,  // C1 seçili: 0 1 1 1
-    0b00001011,  // C2 seçili: 1 0 1 1
-    0b00001101,  // C3 seçili: 1 1 0 1
-    0b00001110   // C4 seçili: 1 1 1 0
+    0b00000111, // C1 seçili: 0 1 1 1
+    0b00001011, // C2 seçili: 1 0 1 1
+    0b00001101, // C3 seçili: 1 1 0 1
+    0b00001110  // C4 seçili: 1 1 1 0
   };
 
   for (byte r = 0; r < 4; r++) {
@@ -105,39 +106,92 @@ void scanAllRowSegments(uint16_t holdMs) {
     }
   }
 
-  shiftWrite(0);  // tarama bitti -> kapat
+  shiftWrite(0); // tarama bitti -> kapat
 }
 
-void scanAllColSegments(uint16_t holdMs) {
-  // Rows: R1..R4 (active-HIGH)
-  const byte ROW_MASKS[4] = {
-    0b10000000,  // R1
-    0b01000000,  // R2
-    0b00100000,  // R3
-    0b00010000   // R4
-  };
 
-  // Cols: C1..C4 (active-LOW: seçilen kolon 0)
-  // Alt nibble = C1 C2 C3 C4 (b3..b0)
-  const byte COL_MASKS[4] = {
-    0b00000111,  // C1 seçili: 0 1 1 1
-    0b00001011,  // C2 seçili: 1 0 1 1
-    0b00001101,  // C3 seçili: 1 1 0 1
-    0b00001110   // C4 seçili: 1 1 1 0
-  };
+// Harfler 4 satırdan oluşuyor.
+// Her satır byte'ı: (RowMask | ColNibble)
+// ColNibble: C1..C4 (active-low) -> yanacak kolon 0, sönük kolon 1
 
-  for (byte c = 0; c < 4; c++) {
-    for (byte r = 0; r < 4; r++) {
+// A: ·██· / █··█ / ████ / █··█
+const byte GLYPH_A[4] = {
+  0b10001001,
+  0b01000110,
+  0b00100000,
+  0b00010110
+};
 
-      byte mask = ROW_MASKS[r] | COL_MASKS[c];
-      shiftWrite(makeByteFromMask(mask));
-      delay(holdMs);
-    }
+// H: █··█ / █··█ / ████ / █··█
+const byte GLYPH_H[4] = {
+  0b10000110,
+  0b00100000,
+  0b01000110,
+  0b00010110
+};
+
+// L: █··· / █··· / █··· / ████
+const byte GLYPH_L[4] = {
+  0b10000111,
+  0b01000111,
+  0b00100111,
+  0b00010001
+};
+
+// P: ████ / █··█ / ████ / █···
+const byte GLYPH_P[4] = {
+  0b10000000,
+  0b01000110,
+  0b00100000,
+  0b00010111
+};
+
+// U: █··█ / █··█ / █··█ / ████
+const byte GLYPH_U[4] = {
+  0b10000110,
+  0b01000110,
+  0b00100110,
+  0b00010000
+};
+
+// Y: █··█ / ·██· / ··█· / ··█·
+const byte GLYPH_Y[4] = {
+  0b10000110,
+  0b01001001,
+  0b00101101,
+  0b00011101
+};
+
+// Z: ████ / ··█· / ·█·· / ████
+const byte GLYPH_Z[4] = {
+  0b10000000,
+  0b01001101,
+  0b00101011,
+  0b00010000
+};
+
+const byte* SEQ[] = { GLYPH_A, GLYPH_H, GLYPH_L, GLYPH_P, GLYPH_U, GLYPH_Y, GLYPH_Z };
+const char  SEQ_NAME[] = "AHLPUYZ";
+
+// satır başı bekleme (parlaklık/flicker ayarı)
+const uint16_t ROW_HOLD_US = 1200;
+
+// 1 kez “frame” bas: R1..R4 hızlı tarama
+void refreshOnce(const byte glyph[4]) {
+  for (byte r = 0; r < 4; r++) {
+    shiftWrite(makeByteFromMask(glyph[r]));
+    delayMicroseconds(ROW_HOLD_US);
   }
-
-  shiftWrite(0);  // tarama bitti -> kapat
 }
 
+// Harfi durationMs boyunca ekranda tut (içeride hızlı tarar)
+void showGlyph(const byte glyph[4], uint16_t durationMs) {
+  unsigned long t0 = millis();
+  while (millis() - t0 < durationMs) {
+    refreshOnce(glyph);
+  }
+  shiftWrite(0); // temizle
+}
 
 void setup() {
   pinMode(DATA_PIN, OUTPUT);
@@ -149,6 +203,9 @@ void setup() {
 }
 
 void loop() {
-  scanAllRowSegments(500);
-  scanAllColSegments(500);
+  for (byte i = 0; i < 7; i++) {
+    Serial.println(SEQ_NAME[i]);
+    showGlyph(SEQ[i], 1000);   // 1 saniye göster
+    showGlyph((const byte[4]){0,0,0,0}, 120); // küçük boşluk (istersen kaldır)
+  }
 }

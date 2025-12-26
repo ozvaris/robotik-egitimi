@@ -18,6 +18,13 @@
       out b4=C4, out b5=C2, out b6=C3, out b7=C1
 */
 
+// 4x4 frame: her satır için "ON pattern" (C1C2C3C4) 1=yanık.
+// (Biz bunu active-low kolon nibble'a çeviriyoruz.)
+struct Frame {
+  const char* name;
+  byte rowOn[4];  // nibble: b3=C1 .. b0=C4 (1=ON)
+};
+
 const int DATA_PIN = 12;   // 74HC595 DS   (pin 14)
 const int CLOCK_PIN = 13;  // 74HC595 SHCP (pin 11)
 const int LATCH_PIN = 11;  // 74HC595 STCP (pin 12)
@@ -74,70 +81,45 @@ byte makeByteFromMask(byte mask) {
   return makeByte(R1, R2, R3, R4, C1, C2, C3, C4);
 }
 
-/*
-  4x4 tarama:
-  - Her adımda 1 satır + 1 kolon seçilir.
-  - Kolonlar active-LOW olduğu için seçilen kolon biti 0 yapılır.
-*/
-void scanAllRowSegments(uint16_t holdMs) {
-  // Rows: R1..R4 (active-HIGH)
-  const byte ROW_MASKS[4] = {
-    0b10000000,  // R1
-    0b01000000,  // R2
-    0b00100000,  // R3
-    0b00010000   // R4
-  };
+// satır başı bekleme (parlaklık/flicker ayarı)
+const uint16_t ROW_HOLD_US = 1200;
 
-  // Cols: C1..C4 (active-LOW: seçilen kolon 0)
-  // Alt nibble = C1 C2 C3 C4 (b3..b0)
-  const byte COL_MASKS[4] = {
-    0b00000111,  // C1 seçili: 0 1 1 1
-    0b00001011,  // C2 seçili: 1 0 1 1
-    0b00001101,  // C3 seçili: 1 1 0 1
-    0b00001110   // C4 seçili: 1 1 1 0
-  };
+// Row mask (b7..b4)
+const byte ROW_MASKS[4] = {
+  0b10000000,  // R1
+  0b01000000,  // R2
+  0b00100000,  // R3
+  0b00010000   // R4
+};
 
+// 16x16 -> tam dolu
+const Frame F_FULL = { "16x16(full)", { 0b1111, 0b1111, 0b1111, 0b1111 } };
+// 8x8 -> çerçeve
+const Frame F_BORDER = { "8x8(border)", { 0b1111, 0b1001, 0b1001, 0b1111 } };
+// 4x4 -> ortada 2x2 dolu (C2,C3 ve R2,R3)
+const Frame F_CENTER2 = { "4x4(center2x2)", { 0b0000, 0b0110, 0b0110, 0b0000 } };
+// 1x1 -> tek nokta (R2,C2)
+const Frame F_DOT = { "1x1(dot)", { 0b0000, 0b0100, 0b0000, 0b0000 } };
+
+// 1 frame refresh (R1..R4 hızlı tarama)
+void refreshOnceFrame(const Frame& f) {
   for (byte r = 0; r < 4; r++) {
-    for (byte c = 0; c < 4; c++) {
-      byte mask = ROW_MASKS[r] | COL_MASKS[c];
-      shiftWrite(makeByteFromMask(mask));
-      delay(holdMs);
-    }
+    byte onNibble = f.rowOn[r] & 0x0F;        // C1..C4 (1=ON)
+    byte colActiveLow = (~onNibble) & 0x0F;   // active-low: ON=0
+    byte mask = ROW_MASKS[r] | colActiveLow;  // b7..b4 row + b3..b0 col
+    shiftWrite(makeByteFromMask(mask));
+    delayMicroseconds(ROW_HOLD_US);
   }
-
-  shiftWrite(0);  // tarama bitti -> kapat
 }
 
-void scanAllColSegments(uint16_t holdMs) {
-  // Rows: R1..R4 (active-HIGH)
-  const byte ROW_MASKS[4] = {
-    0b10000000,  // R1
-    0b01000000,  // R2
-    0b00100000,  // R3
-    0b00010000   // R4
-  };
-
-  // Cols: C1..C4 (active-LOW: seçilen kolon 0)
-  // Alt nibble = C1 C2 C3 C4 (b3..b0)
-  const byte COL_MASKS[4] = {
-    0b00000111,  // C1 seçili: 0 1 1 1
-    0b00001011,  // C2 seçili: 1 0 1 1
-    0b00001101,  // C3 seçili: 1 1 0 1
-    0b00001110   // C4 seçili: 1 1 1 0
-  };
-
-  for (byte c = 0; c < 4; c++) {
-    for (byte r = 0; r < 4; r++) {
-
-      byte mask = ROW_MASKS[r] | COL_MASKS[c];
-      shiftWrite(makeByteFromMask(mask));
-      delay(holdMs);
-    }
+// Belirli süre boyunca frame göster (içeride hızlı tarama var!)
+void showFrame(const Frame& f, uint16_t durationMs) {
+  unsigned long t0 = millis();
+  while (millis() - t0 < durationMs) {
+    refreshOnceFrame(f);
   }
-
-  shiftWrite(0);  // tarama bitti -> kapat
+  shiftWrite(0);  // temizle
 }
-
 
 void setup() {
   pinMode(DATA_PIN, OUTPUT);
@@ -149,6 +131,20 @@ void setup() {
 }
 
 void loop() {
-  scanAllRowSegments(500);
-  scanAllColSegments(500);
+  // for (byte i = 0; i < 7; i++) {
+  //   Serial.println(SEQ_NAME[i]);
+  //   showGlyph(SEQ[i], 1000);                        // 1 saniye göster
+  //   showGlyph((const byte[4]){ 0, 0, 0, 0 }, 120);  // küçük boşluk (istersen kaldır)
+  // }
+
+  // küçül
+  showFrame(F_FULL, 1000);
+  showFrame(F_BORDER, 1000);
+  showFrame(F_CENTER2, 1000);
+  showFrame(F_DOT, 1000);
+
+  // büyü
+  showFrame(F_CENTER2, 1000);
+  showFrame(F_BORDER, 1000);
+  showFrame(F_FULL, 1000);
 }
