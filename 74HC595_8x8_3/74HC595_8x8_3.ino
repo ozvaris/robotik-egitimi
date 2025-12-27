@@ -47,16 +47,16 @@ byte makeByte(
   byte v = 0;
 
   // Rows -> output bitleri
-  if (R4) v |= (1 << 0);
-  if (R2) v |= (1 << 1);
-  if (R1) v |= (1 << 2);
-  if (R3) v |= (1 << 3);
+  if (R4) v |= (1 << 2);
+  if (R2) v |= (1 << 0);
+  if (R1) v |= (1 << 3);
+  if (R3) v |= (1 << 7);
 
   // Cols -> output bitleri
   if (C4) v |= (1 << 4);
   if (C2) v |= (1 << 5);
   if (C3) v |= (1 << 6);
-  if (C1) v |= (1 << 7);
+  if (C1) v |= (1 << 1);
 
   return v;
 }
