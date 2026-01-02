@@ -3,8 +3,7 @@ int b = 6;
 int c = 5;
 int d = 11;
 int e = 10;
-int
-  f = 8;
+int f = 8;
 int g = 9;
 int dp = 4;
 
@@ -160,12 +159,12 @@ void loop() {
     display7();
     delay(2000);
     clearDisplay();
-    display8();
 
+    display8();
     delay(2000);
     clearDisplay();
-    display9();
 
+    display9();
     delay(2000);
   }
 }

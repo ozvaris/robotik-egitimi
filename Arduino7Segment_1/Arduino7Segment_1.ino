@@ -9,15 +9,6 @@ const int f  = 8;
 const int g  = 9;
 const int dp = 4;
 
-a  = 7
-b  = 6
-c  = 5
-d  = 11
-e  = 10
-f  = 8
-g  = 9
-dp = 4
-
 // Sıra: a,b,c,d,e,f,g,dp
 const int segPins[8]   = {a, b, c, d, e, f, g, dp};
 const char segNames[8] = {'a','b','c','d','e','f','g','p'}; // p = dp
