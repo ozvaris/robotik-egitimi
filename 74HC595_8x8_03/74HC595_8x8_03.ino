@@ -257,6 +257,8 @@ const byte GLYPH_W[8] = { 0b00000000,0b01000010,0b01000010,0b01000010,0b01011010
 const byte GLYPH_X[8] = { 0b00000000,0b01000010,0b00100100,0b00011000,0b00011000,0b00011000,0b00100100,0b01000010 };
 const byte GLYPH_Y[8] = { 0b00000000,0b01000010,0b00100100,0b00011000,0b00001000,0b00001000,0b00001000,0b00001000 };
 const byte GLYPH_Z[8] = { 0b00000000,0b01111110,0b00000010,0b00000100,0b00001000,0b00010000,0b00100000,0b01111110 };
+const byte GLYPH_DEGREE[8] = { 0b00000000,0b00011000,0b00011000,0b00000000,0b00000000,0b00000000,0b00000000,0b00000000 };
+
 
 // ------------------------------------------------------------
 // SEQ / SEQ_NAME
@@ -294,9 +296,11 @@ void setup() {
 }
 
 void loop() {
-  for (byte i = 0; i < SEQ_LEN; i++) {
-    Serial.println(SEQ_NAME[i]);
-    showGlyph(SEQ[i], 1000);           // 1 saniye göster
-    showGlyph(GLYPH_SPACE, 120);       // küçük boşluk
-  }
+  scrollText("AHMET", 60);
+  showGlyph(GLYPH_SPACE, 300);
+
+  scrollText("BU GUN HAVA 25^C", 60); // ^ = derece
+  showGlyph(GLYPH_SPACE, 300);
 }
+
+

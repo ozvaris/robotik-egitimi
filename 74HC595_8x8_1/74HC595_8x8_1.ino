@@ -139,7 +139,7 @@ void scanAllColSegments(uint16_t holdMs) {
 }
 
 
-const byte singlebyte   = 0b10000000;
+const byte singlebyte   = 0b11110000;
 
 
 void setup() {
@@ -152,9 +152,9 @@ void setup() {
 }
 
 void loop() {
-  // shiftWrite(makeByteFromMask(singlebyte));
-  // delay(1000);
+  shiftWrite(makeByteFromMask(singlebyte));
+  delay(1000);
   
-  scanAllRowSegments(500);
-  scanAllColSegments(500);
+  // scanAllRowSegments(500);
+  // scanAllColSegments(500);
 }
