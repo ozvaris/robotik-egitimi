@@ -342,17 +342,85 @@ void setup() {
 }
 
 void loop() {
-  static bool started = false;
+  static byte mode = 0;
+  static bool inited = false;
 
-  if (!started) {
-    startScroll("AYSENUR MERHABA", 60);
-    started = true;
+  // Hem göz hem 2 yazı
+
+  if (!inited) {
+    startEyes2(5000);  // 5 saniye göz + pupil hareketi
+    inited = true;
+  }
+
+  if (mode == 0) {
+    eyes2Update();
+    if (eyes2IsDone()) {
+      startScroll("AHMET", 60);
+      mode = 1;
+    }
+    return;
+  }
+
+  if (mode == 1) {
+    scrollUpdate();
+    if (scrollIsDone()) {
+      startScroll("BU GUN HAVA 25^C", 60);
+      mode = 2;
+    }
+    return;
   }
 
   scrollUpdate();
-
   if (scrollIsDone()) {
-    showGlyph(GLYPH_SPACE, 250);          // küçük durak (ana dosyanda showGlyph var)
-    startScroll("BU GUN HAVA 25^C", 60);  // ^ = derece
+    startEyes2(5000);
+    mode = 0;
   }
+
+  //Yanliz yazi
+
+  // if (mode == 0) {
+  //   scrollUpdate();
+  //   if (scrollIsDone()) {
+  //     startScroll("AHMET", 60);
+  //     mode = 1;
+  //   }
+  //   return;
+  // }
+
+  // if (mode == 1) {
+  //   scrollUpdate();
+  //   if (scrollIsDone()) {
+  //     startScroll("BU GUN HAVA 25^C", 60);
+  //     mode = 0;
+  //   }
+  //   return;
+  // }
+
+  // Yanliz eye2
+
+  // if (!inited) {
+  //   startEyes2(5000);  // 5 saniye
+  //   inited = true;
+  // }
+
+  // eyes2Update();
+
+  // if (!inited) {
+  //   startEyes2(5000); // 5 saniye
+  //   inited = true;
+  // }
+
+  // eyes2Update();
+
+  // Yanliz eye
+
+  // if (!inited) {
+  //   startBlinkEyes(5000);  // 5 saniye
+  //   inited = true;
+  // }
+
+  // blinkEyesUpdate();
+
+  // bittiğinde istersen burada başka şey yaparsın
+  // if (eyes2IsDone()) { ... }
 }
