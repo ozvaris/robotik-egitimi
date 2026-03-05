@@ -11,13 +11,13 @@
 // ------------------------------------------------------------
 // PINLER (senin dosyandan aynen)
 // ------------------------------------------------------------
-const int DATA_PIN_0 = 9;    // register1 (COL) 74HC595 DS
-const int CLOCK_PIN_0 = 10;  // register1 (COL) 74HC595 SHCP
-const int LATCH_PIN_0 = 8;   // register1 (COL) 74HC595 STCP
+const int DATA_PIN_0  = 9;   // register1 (COL) 74HC595 DS (pin 14)
+const int CLOCK_PIN_0 = 10;  // register1 (COL) 74HC595 SHCP (pin 11)
+const int LATCH_PIN_0 = 8;   // register1 (COL) 74HC595 STCP (pin 12)
 
-const int DATA_PIN_1 = 12;   // register2 (ROW) 74HC595 DS
-const int CLOCK_PIN_1 = 13;  // register2 (ROW) 74HC595 SHCP
-const int LATCH_PIN_1 = 11;  // register2 (ROW) 74HC595 STCP
+const int DATA_PIN_1  = 12;  // register2 (ROW) 74HC595 DS (pin 14)
+const int CLOCK_PIN_1 = 13;  // register2 (ROW) 74HC595 SHCP (pin 11)
+const int LATCH_PIN_1 = 11;  // register2 (ROW) 74HC595 STCP (pin 12)
 
 // ------------------------------------------------------------
 // AYARLAR (TERS/AYNA gibi durumlarda burayı değiştir)
@@ -343,7 +343,7 @@ void setup() {
 
 void loop() {
   static byte mode = 0;
-  static bool inited = false;
+  // static bool inited = false;
 
   // Hem göz hem 2 yazı
 

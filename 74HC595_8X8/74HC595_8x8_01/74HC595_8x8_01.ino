@@ -8,19 +8,22 @@
   - Row seçimi: ACTIVE-HIGH  (1 => satır aktif)
   - Col seçimi: ACTIVE-LOW   (0 => kolon aktif)
 
-  register1 = 1. 74HC595 (COL tarafı varsayımı)
-  register2 = 2. 74HC595 (ROW tarafı varsayımı)
+  register1 = 1. 74HC595 (8X8 UP PINS )
+
+
+
+  register2 = 2. 74HC595 (8X8 DOWN PINS)
 
   NOT: Mapping’i sen yapacağın için sadece makeByte_0 / makeByte_1 içini değiştirmen yeterli.
 */
 
-const int DATA_PIN_0  = 9;   // register1 (COL) 74HC595 DS
-const int CLOCK_PIN_0 = 10;  // register1 (COL) 74HC595 SHCP
-const int LATCH_PIN_0 = 8;   // register1 (COL) 74HC595 STCP
+const int DATA_PIN_0  = 9;   // register1  74HC595 DS (pin 14)
+const int CLOCK_PIN_0 = 10;  // register1  74HC595 SHCP (pin 11)
+const int LATCH_PIN_0 = 8;   // register1  74HC595 STCP (pin 12)
 
-const int DATA_PIN_1  = 12;  // register2 (ROW) 74HC595 DS
-const int CLOCK_PIN_1 = 13;  // register2 (ROW) 74HC595 SHCP
-const int LATCH_PIN_1 = 11;  // register2 (ROW) 74HC595 STCP
+const int DATA_PIN_1  = 12;  // register2  74HC595 DS (pin 14)
+const int CLOCK_PIN_1 = 13;  // register2  74HC595 SHCP (pin 11)
+const int LATCH_PIN_1 = 11;  // register2  74HC595 STCP (pin 12)
 
 void writeSingle(byte rowMask, byte colMask) ;
 
@@ -155,8 +158,8 @@ const byte COL_MASKS[8] = {
 // ------------------------------------------------------------
 void scanAllRowSegments(uint16_t holdMs) {
 
-  for (int r = 7; r >= 0; r--) {
-    for (int c = 7; c >= 0; c--) {
+  for (int r = 0; r <= 7; r++) {
+    for (int c = 0; c <= 7; c++) {
       writeMasks(ROW_MASKS[r], COL_MASKS[c]);
       delay(holdMs);
     }
@@ -168,8 +171,8 @@ void scanAllRowSegments(uint16_t holdMs) {
 
 void scanAllColSegments(uint16_t holdMs) {
 
-  for (int c = 7; c >= 0; c--) {
-    for (int r = 7; r >= 0; r--) {
+  for (int c = 0; c <= 7; c++) {
+    for (int r = 0; r <= 7; r++) {
       writeMasks(ROW_MASKS[r], COL_MASKS[c]);
       delay(holdMs);
     }
@@ -192,8 +195,12 @@ void setup() {
   allOff();
 }
 
-const byte singleRowByte   = 0b10000000;
-const byte singleColByte   = 0b01111111;
+// const byte singleRowByte   = 0b00000001; // ROW1
+// const byte singleColByte   = 0b11111110; // COL1
+
+const byte singleRowByte   = 0b00000001; 
+const byte singleColByte   = 0b11111110; 
+
 
 void writeSingle(byte rowMask, byte colMask) {
   byte reg1, reg2;
