@@ -215,9 +215,9 @@ void loop() {
   allOff();
   delay(150);
 
-  writeSingle(singleRowByte, singleColByte);
-  delay(1000);
+  // writeSingle(singleRowByte, singleColByte);
+  // delay(1000);
 
-  // scanAllRowSegments(200);
-  // scanAllColSegments(200);
+  scanAllRowSegments(200);
+  scanAllColSegments(200);
 }

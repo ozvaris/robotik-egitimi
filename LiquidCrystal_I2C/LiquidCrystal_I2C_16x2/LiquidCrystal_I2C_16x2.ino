@@ -26,9 +26,8 @@ void loop() {
     last = millis();
     sec++;
 
-    lcd.setCursor(12, 1);     // 2. satirin sonuna yakin
-    if (sec < 10) lcd.print("  ");      // temizle
-    else if (sec < 100) lcd.print(" "); // temizle
+    lcd.setCursor(12, 1);     // 2. satir, 12. kolon
+    if (sec < 10) lcd.print("    ");
     lcd.setCursor(12, 1);
     lcd.print(sec);
   }

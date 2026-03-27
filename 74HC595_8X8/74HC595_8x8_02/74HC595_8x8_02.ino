@@ -45,8 +45,6 @@ void shiftWrite2(byte register1Value, byte register2Value) {
   digitalWrite(LATCH_PIN_1, HIGH);
 }
 
-void writeSingle(byte rowMask, byte colMask);
-
 // ------------------------------------------------------------
 // MAPPING (senin dosyandaki haliyle)
 // ------------------------------------------------------------
@@ -130,12 +128,6 @@ void writeMasks(byte rowMask, byte colMask) {
 void allOff() {
   // satırları kapat + kolonları pasif yap (active-low => 1 pasif)
   writeMasks(0x00, 0xFF);
-}
-
-void writeSingle(byte rowMask, byte colMask) {
-  byte reg1, reg2;
-  mapMasksToOutputs(rowMask, colMask, reg1, reg2);
-  shiftWrite2(reg1, reg2);
 }
 
 // ------------------------------------------------------------

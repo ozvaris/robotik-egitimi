@@ -343,7 +343,7 @@ void setup() {
 
 void loop() {
   static byte mode = 0;
-  // static bool inited = false;
+  static bool inited = false;
 
   // Hem göz hem 2 yazı
 
