@@ -38,7 +38,9 @@ void loop() {
 
   while (pos <= 15) {
 
-    Serial.println("\while1 Basladi");
+    Serial.print("while Basladi ");
+    // Serial.print("stepCount: ");
+    // Serial.println(stepCount);
 
     lcd.clear();
     lcd.setCursor(pos, 0);
